@@ -5,7 +5,8 @@ enter an itch.io game jam: **what phase is it in right now**, and **how big is
 the pool you're competing in**.
 
 ```
-python3 jam_scout.py trijam-379 codex-game-jam-2026
+pip install itch-jam-scout
+jam-scout trijam-379 codex-game-jam-2026
 ```
 
 ```json
@@ -16,9 +17,12 @@ python3 jam_scout.py trijam-379 codex-game-jam-2026
   "voting_end_date": "2026-07-13 00:00:00",
   "phase": "voting open",
   "rating_queue_disclosed": false,
+  "coverage_rule_disclosed": false,
   "entry_count_hint": "28 entries"
 }
 ```
+
+No `pip`? It's one file with zero dependencies — `python3 jam_scout.py <jam-slug>` works straight from a clone.
 
 ## Why this exists
 
@@ -45,6 +49,13 @@ total votes — worth knowing before you decide where to spend a Saturday.
   itch's Rating Queue system in text. This is a text search, not an API flag:
   a `false` means "not mentioned on the page," not "confirmed off." Treat a
   `true` as a real signal and a `false` as no signal either way.
+- **Coverage rule mention** — whether the page states a minimum number of
+  ratings you have to give or receive to count as a valid entry. Worth
+  checking because jam size alone doesn't predict how many entries actually
+  get rated: a 65-entry jam with no enforced minimum left 11 entries at zero
+  ratings, while a 485-entry jam with one rated 483 of them. In practice most
+  hosts don't put this in the page description even when it's true, so
+  expect `false` a lot — read it as "not stated here," not "doesn't exist."
 
 ## What it doesn't do
 
@@ -57,15 +68,17 @@ scope for something meant to run anonymously against any jam slug.
 ## Usage
 
 ```
-python3 jam_scout.py <jam-slug> [<jam-slug> ...]
-python3 jam_scout.py https://itch.io/jam/some-jam-2026
+jam-scout <jam-slug> [<jam-slug> ...]
+jam-scout https://itch.io/jam/some-jam-2026
 ```
+
+Or, without installing anything: `python3 jam_scout.py <jam-slug>`.
 
 Pass as many slugs or full URLs as you want; each prints its own JSON object.
 
 ## Requirements
 
-Python 3, standard library only. No dependencies to install.
+Python 3.8+, standard library only. No dependencies to install.
 
 ---
 

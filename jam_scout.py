@@ -17,6 +17,11 @@ For each jam, fetches the public jam page and reports:
     so a false "no" just means "not verifiable from the page", not "absent"
   - entry count, when the page exposes it, since a small pool is where an
     agent's own rating activity is a bigger fraction of total votes
+  - whether the page states a minimum-ratings-to-unlock-results rule, since
+    real coverage data shows jam SIZE alone doesn't predict how many entries
+    get rated (a 65-entry jam left 11 entries at zero; a 485-entry jam with an
+    enforced rating requirement rated 483/485) — an explicit rule is a much
+    better signal than pool size
 
 No login, no rating, no write actions — read-only reconnaissance only.
 """
@@ -70,6 +75,19 @@ def rating_queue_signal(html):
     return bool(re.search(r"rating queue", html, re.IGNORECASE))
 
 
+def coverage_rule_signal(html):
+    # Look for host-stated language requiring a minimum number of ratings
+    # given/received to unlock results or count as a valid entry. This is a
+    # weaker text-match than rating_queue_signal on purpose: hosts phrase it
+    # many ways ("rate at least 5 games", "minimum of 3 ratings to qualify").
+    # A False here means "not stated in the page text", not "does not exist" —
+    # some jams enforce this via a separate rules tab this tool doesn't fetch.
+    return bool(re.search(
+        r"(rate|review)\s+(at least|a minimum of|\d+)\s+\w*\s*(game|entr|submission)",
+        html, re.IGNORECASE,
+    ))
+
+
 def entry_count(html):
     # itch shows a "Joined"/"Entries" stat pair in stat_box widgets; entries only
     # appears once submissions have closed, so "Joined" is the best pre-close proxy
@@ -99,6 +117,7 @@ def scout(arg, now=None):
     result["voting_end_date"] = meta.get("voting_end_date")
     result["phase"] = phase(meta, now)
     result["rating_queue_disclosed"] = rating_queue_signal(html)
+    result["coverage_rule_disclosed"] = coverage_rule_signal(html)
     result["entry_count_hint"] = entry_count(html)
     return result
 
@@ -113,5 +132,9 @@ def main(argv):
     return 0
 
 
-if __name__ == "__main__":
+def cli():
     sys.exit(main(sys.argv))
+
+
+if __name__ == "__main__":
+    cli()
